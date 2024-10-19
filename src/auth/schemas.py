@@ -4,6 +4,8 @@ from datetime import datetime, date
 from typing import Optional
 from pydantic import EmailStr, field_validator, BaseModel, model_validator
 
+from src.auth.token_types import TokenType
+
 
 class BaseInstance(BaseModel):
     created_at: datetime
@@ -71,10 +73,16 @@ class UserLogin(BaseModel):
 
 
 class AccessToken(BaseModel):
-    access_token: str
+    access: str
+    token_type: str = "bearer"
+
+class TokenPair(BaseModel):
+    access: str
+    refresh: str
     token_type: str = "bearer"
 
 
 class TokenData(BaseModel):
     username: str | None = None
     id: int | None = None
+    type: str | None = None

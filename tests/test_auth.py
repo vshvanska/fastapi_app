@@ -152,7 +152,7 @@ def test_user_login_success():
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 200
-    assert response_data.get("access_token") is not None
+    assert response_data.get("access") is not None
 
 
 def test_user_login_invalid_username():
@@ -163,7 +163,7 @@ def test_user_login_invalid_username():
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 401
-    assert response_data.get("access_token") is None
+    assert response_data.get("access") is None
 
 
 def test_user_login_invalid_password():
@@ -174,7 +174,7 @@ def test_user_login_invalid_password():
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 401
-    assert response_data.get("access_token") is None
+    assert response_data.get("access") is None
 
 
 def test_read_users_me_success():
@@ -186,7 +186,7 @@ def test_read_users_me_success():
     login_response_data = login_response.json()
     response = client.get(
         "/users/me",
-        headers={"Authorization": f"Bearer {login_response_data.get('access_token')}"}
+        headers={"Authorization": f"Bearer {login_response_data.get('access')}"}
     )
     assert response.status_code == 200
     response_data = response.json()
@@ -202,4 +202,24 @@ def test_read_users_me_invalid_token():
     response = client.get(
         "/users/me", headers={"Authorization": "Bearer dfgzdg.ihausfi7.kuyfgiufyo"}
     )
+    assert response.status_code == 401
+
+
+def test_refresh_token_success():
+    user_data = {
+        "username": "username12",
+        "password": "StrongPass1!"
+    }
+    login_response = client.post("/users/token", data=user_data)
+    login_response_data = login_response.json()
+
+    response = client.post(f"users/refresh?token={login_response_data.get('refresh')}")
+    assert response.status_code == 200
+
+    response_data = response.json()
+    assert response_data.get("access") is not None
+
+
+def test_refresh_token_invalid():
+    response = client.post("users/refresh?token=khgvkuyglisdu`ghfpi.s`defoegge`rdg.`ergae`rggdszf")
     assert response.status_code == 401

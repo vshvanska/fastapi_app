@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     SECRET_KEY: str
     ALGORITHM = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES = 3000
+    ACCESS_TOKEN_EXPIRE_MINUTES = 300
+    REFRESH_TOKEN_EXPIRE_DAYS = 1
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
 
     class Config:

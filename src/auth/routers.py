@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.auth import Authenticator
-from src.auth.schemas import AccessToken, User
+from src.auth.schemas import AccessToken, User, TokenPair
 from src.auth.repositories import UserRepository
 from src.auth.schemas import UserCreate
 from src.config import settings
@@ -31,7 +31,7 @@ async def login_for_access_token(
     authenticator=Depends(get_authenticator),
     repository: UserRepository = Depends(get_user_repository),
     session=Depends(get_async_session)
-) -> AccessToken:
+) -> TokenPair:
     user = await authenticator.authenticate_user(
         form_data.username, form_data.password, repository, session
     )
@@ -41,9 +41,18 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = await authenticator.create_access_token(
+    token_data = await authenticator.create_pair_token(
         data={"sub": user.username, "id": user.id},
     )
+    return token_data
+
+
+@user_router.post("/refresh", response_model=AccessToken)
+async def read_users_me(
+        token: str,
+        authenticator: Authenticator = Depends(get_authenticator),
+):
+    token =  await authenticator.refresh_access_token(token=token)
     return token
 
 
