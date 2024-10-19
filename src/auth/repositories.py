@@ -11,6 +11,14 @@ from src.repositories import AbstractRepository
 class UserRepository(AbstractRepository):
     model = User
 
+    async def get_list(self, session, *args, **kwargs):
+        result = await session.scalars(select(self.model))
+        return result.all()
+
+    async def get_instance(self, id, session):
+        result = await session.scalars(select(self.model).where(self.model.id == id))
+        return result.one_or_none()
+
     async def create_instance(self, data, session: AsyncSession):
         data = await self.process_data(data)
 
@@ -20,23 +28,31 @@ class UserRepository(AbstractRepository):
         session.add(new_item)
         await session.commit()
         return JSONResponse(
-            content={"message": "User created successfully",
-                     "user_id": new_item.id},
-            status_code=201
+            content={"message": "User created successfully", "user_id": new_item.id},
+            status_code=201,
         )
+
+    async def update_instance(self, id: int, data: dict, session: AsyncSession):
+        data = data.model_dump()
+        user = await self.get_instance(id, session)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        for key, value in data.items():
+            setattr(user, key, value)
+        await session.commit()
+
+        return user
 
     async def check_if_user_exists(self, data, session):
         instance = await self.get_by_email(data["email"], session)
         if instance:
-            raise HTTPException(
-                status_code=400, detail="Email already registered"
-            )
+            raise HTTPException(status_code=400, detail="Email already registered")
 
         instance = await self.get_by_username(data["username"], session)
         if instance:
             raise HTTPException(
-                status_code=400,
-                detail="User with this username already registred"
+                status_code=400, detail="User with this username already registred"
             )
 
     async def get_by_email(self, email, session):
@@ -51,12 +67,6 @@ class UserRepository(AbstractRepository):
         )
         return result.one_or_none()
 
-    async def get_by_id(self, id: int, session):
-        result = await session.scalars(
-            select(self.model).where(self.model.id == id)
-        )
-        return result.one_or_none()
-
     async def process_data(self, data):
         data = data.model_dump()
 
@@ -67,9 +77,3 @@ class UserRepository(AbstractRepository):
         data["email"] = data["email"].lower()
 
         return data
-
-    async def get_list_of_instances(self, *args, **kwargs):
-        pass
-
-    async def get_instance(self, *args, **kwargs):
-        pass

@@ -1,5 +1,3 @@
-import os
-
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic.v1 import BaseSettings

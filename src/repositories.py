@@ -5,7 +5,7 @@ class AbstractRepository(ABC):
     model = None
 
     @abstractmethod
-    async def get_list_of_instances(self,  *args, **kwargs):
+    async def get_list(self, *args, **kwargs):
         pass
 
     @abstractmethod

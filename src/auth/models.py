@@ -1,12 +1,13 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import String, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models import BaseModel
+from src.posts.models import Post
 
 
 class User(BaseModel):
-    __tablename__ = "user_account"
+    __tablename__ = "user"
 
     username: Mapped[str] = mapped_column(String(30), unique=True)
     fullname: Mapped[Optional[str]]
@@ -15,6 +16,9 @@ class User(BaseModel):
     hashed_password: Mapped[str] = mapped_column(String)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+    posts: Mapped[List[Post]] = relationship(
+        Post, back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return {self.username}

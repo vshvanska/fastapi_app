@@ -10,9 +10,11 @@ from src.auth.models import User
 @pytest.fixture
 async def add_user():
     async with TestingSessionLocal() as session:
-        stmt = insert(User).values(username='username12',
-                                   email="useremail12@example.com",
-                                   hashed_password=await hasher.hash("StrongPass1!"))
+        stmt = insert(User).values(
+            username="username12",
+            email="useremail12@example.com",
+            hashed_password=await hasher.hash("StrongPass1!"),
+        )
         await session.execute(stmt)
         await session.commit()
 
@@ -24,7 +26,7 @@ def test_register_user_success():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "StrongPass1!",
-        "password_confirm": "StrongPass1!"
+        "password_confirm": "StrongPass1!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -38,7 +40,7 @@ def test_register_user_different_passwords():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "StrongPass1!",
-        "password_confirm": "StrongPass2!"
+        "password_confirm": "StrongPass2!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -52,7 +54,7 @@ def test_register_user_passwords_len_less_than_8():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "Stron1",
-        "password_confirm": "Stron1"
+        "password_confirm": "Stron1",
     }
 
     response = client.post("/users/", json=user_data)
@@ -66,7 +68,7 @@ def test_register_user_passwords_without_upper_letter():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "strongpassword1!",
-        "password_confirm": "strongpassword1!"
+        "password_confirm": "strongpassword1!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -80,7 +82,7 @@ def test_register_user_passwords_without_lower_letter():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "STRONGPAS1!",
-        "password_confirm": "STRONGPAS1!"
+        "password_confirm": "STRONGPAS1!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -94,7 +96,7 @@ def test_register_passwords_without_digit():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "StrongPass!",
-        "password_confirm": "StrongPass!"
+        "password_confirm": "StrongPass!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -108,7 +110,7 @@ def test_register_user_with_exiting_email(add_user):
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "StrongPass!",
-        "password_confirm": "StrongPass!"
+        "password_confirm": "StrongPass!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -122,7 +124,7 @@ def test_register_user_with_exiting_username():
         "fullname": "Test User",
         "birthdate": "2000-01-01",
         "password": "StrongPass!",
-        "password_confirm": "StrongPass!"
+        "password_confirm": "StrongPass!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -137,7 +139,7 @@ def test_register_user_with_birth_date_in_future():
         "fullname": "Test User",
         "birthdate": f"{today + 1}-01-01",
         "password": "StrongPass1!",
-        "password_confirm": "StrongPass1!"
+        "password_confirm": "StrongPass1!",
     }
 
     response = client.post("/users/", json=user_data)
@@ -145,10 +147,7 @@ def test_register_user_with_birth_date_in_future():
 
 
 def test_user_login_success():
-    user_data = {
-        "username": "username12",
-        "password": "StrongPass1!"
-    }
+    user_data = {"username": "username12", "password": "StrongPass1!"}
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 200
@@ -156,10 +155,7 @@ def test_user_login_success():
 
 
 def test_user_login_invalid_username():
-    user_data = {
-        "username": "invalidusername",
-        "password": "StrongPass1!"
-    }
+    user_data = {"username": "invalidusername", "password": "StrongPass1!"}
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 401
@@ -167,10 +163,7 @@ def test_user_login_invalid_username():
 
 
 def test_user_login_invalid_password():
-    user_data = {
-        "username": "username",
-        "password": "StrongPass11!"
-    }
+    user_data = {"username": "username", "password": "StrongPass11!"}
     response = client.post("/users/token", data=user_data)
     response_data = response.json()
     assert response.status_code == 401
@@ -178,15 +171,12 @@ def test_user_login_invalid_password():
 
 
 def test_read_users_me_success():
-    user_data = {
-        "username": "username12",
-        "password": "StrongPass1!"
-    }
+    user_data = {"username": "username12", "password": "StrongPass1!"}
     login_response = client.post("/users/token", data=user_data)
     login_response_data = login_response.json()
     response = client.get(
         "/users/me",
-        headers={"Authorization": f"Bearer {login_response_data.get('access')}"}
+        headers={"Authorization": f"Bearer {login_response_data.get('access')}"},
     )
     assert response.status_code == 200
     response_data = response.json()
@@ -206,10 +196,7 @@ def test_read_users_me_invalid_token():
 
 
 def test_refresh_token_success():
-    user_data = {
-        "username": "username12",
-        "password": "StrongPass1!"
-    }
+    user_data = {"username": "username12", "password": "StrongPass1!"}
     login_response = client.post("/users/token", data=user_data)
     login_response_data = login_response.json()
 
@@ -221,5 +208,7 @@ def test_refresh_token_success():
 
 
 def test_refresh_token_invalid():
-    response = client.post("users/refresh?token=khgvkuyglisdu`ghfpi.s`defoegge`rdg.`ergae`rggdszf")
+    response = client.post(
+        "users/refresh?token=khgvkuyglisdu`ghfpi.s`defoegge`rdg.`ergae`rggdszf"
+    )
     assert response.status_code == 401

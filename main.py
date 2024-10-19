@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from src.auth.routers import user_router
+from src.posts.routers import post_router
 
 app = FastAPI()
 
 
 app.include_router(user_router)
+app.include_router(post_router)
 
 
 @app.get("/")
