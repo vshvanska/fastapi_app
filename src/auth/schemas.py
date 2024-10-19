@@ -13,8 +13,8 @@ class BaseInstance(BaseModel):
 class UserBase(BaseModel):
     username: str
     email: EmailStr
-    fullname: str = None
-    birthdate: date = None
+    fullname: Optional[str] = None
+    birthdate: Optional[date] = None
     is_active: bool = True
 
 
@@ -59,3 +59,22 @@ class UserCreate(UserBase):
             if value > today:
                 raise ValueError("Birth date cannot be in the future.")
         return value
+
+
+class User(UserBase):
+    id: int
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
+class AccessToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+    id: int | None = None

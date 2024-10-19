@@ -2,6 +2,8 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.auth.hasher import hasher
 from src.auth.models import User
 from src.repositories import AbstractRepository
 
@@ -49,20 +51,22 @@ class UserRepository(AbstractRepository):
         )
         return result.one_or_none()
 
+    async def get_by_id(self, id: int, session):
+        result = await session.scalars(
+            select(self.model).where(self.model.id == id)
+        )
+        return result.one_or_none()
+
     async def process_data(self, data):
         data = data.model_dump()
 
-        data["hashed_password"] = hash(data["password"])
+        data["hashed_password"] = await hasher.hash(data["password"])
         del data["password_confirm"]
         del data["password"]
 
         data["email"] = data["email"].lower()
 
         return data
-
-    @staticmethod
-    async def hash_password(self, password):
-        return hash(password)
 
     async def get_list_of_instances(self, *args, **kwargs):
         pass

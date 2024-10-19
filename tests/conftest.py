@@ -5,9 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.pool import NullPool
 from starlette.testclient import TestClient
-from src.database import metadata, get_async_session, Base
+from src.database import metadata, Base
 from main import app
-
+from src.dependencies import get_async_session
 
 DATABASE_URL = "sqlite+aiosqlite:///./testsql_app.db"
 test_engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
