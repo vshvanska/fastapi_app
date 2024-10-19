@@ -21,3 +21,11 @@ class PostList(PostBase, BaseInstance):
     user: UserPost
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PostComment(BaseInstance):
+    id: int
+    title: str
+    user: UserPost
+
+    model_config = ConfigDict(from_attributes=True)

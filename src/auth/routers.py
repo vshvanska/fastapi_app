@@ -56,10 +56,10 @@ async def refresh_token(
 
 @user_router.get("/me", response_model=User)
 async def read_users_me(
-        token: Annotated[str, Depends(settings.oauth2_scheme)],
-        authenticator: Authenticator = Depends(get_authenticator),
-        repository: AbstractRepository = Depends(get_user_repository),
-        session: AsyncSession = Depends(get_async_session),
+    token: Annotated[str, Depends(settings.oauth2_scheme)],
+    authenticator: Authenticator = Depends(get_authenticator),
+    repository: AbstractRepository = Depends(get_user_repository),
+    session: AsyncSession = Depends(get_async_session),
 ):
     return await authenticator.get_current_user(
         token=token, repository=repository, session=session

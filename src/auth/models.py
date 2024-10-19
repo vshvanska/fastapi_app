@@ -2,6 +2,8 @@ from datetime import date
 from typing import Optional, List
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.comments.models import Comment
 from src.models import BaseModel
 from src.posts.models import Post
 
@@ -18,6 +20,9 @@ class User(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
     posts: Mapped[List[Post]] = relationship(
         Post, back_populates="user", cascade="all, delete-orphan"
+    )
+    comments: Mapped[List[Comment]] = relationship(
+        Comment, back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self):

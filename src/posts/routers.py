@@ -41,7 +41,7 @@ async def get_posts(
 
 @post_router.get("/my", response_model=List[PostList])
 async def get_personal_posts(
-    token: Annotated[str, Depends(settings.oauth2_scheme)] = None,
+    token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
     repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
@@ -64,6 +64,11 @@ async def update_post(
 ):
     token_data = await authenticator.check_if_authenticated(token=token)
     instance = await repository.get_instance(id=post_id, session=session)
+    if not instance:
+        raise HTTPException(
+            status_code=status.HTTP_404_BAD_REQUEST, detail="Instance not found"
+        )
+
     if token_data.id != instance.user_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect credentials"
@@ -85,10 +90,12 @@ async def delete_post(
 ):
     token_data = await authenticator.check_if_authenticated(token=token)
     instance = await repository.get_instance(id=post_id, session=session)
+    instance = await repository.get_instance(id=post_id, session=session)
+    if not instance:
+        raise HTTPException(status_code=404, detail="Instance not found")
+
     if token_data.id != instance.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect credentials"
-        )
+        raise HTTPException(status_code=404, detail="Incorrect credentials")
 
     await repository.delete_instance(id=post_id, session=session)
     return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content="Post deleted")
