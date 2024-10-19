@@ -15,6 +15,7 @@ class UserBase(BaseModel):
     email: EmailStr
     fullname: str = None
     birthdate: date = None
+    is_active: bool = True
 
 
 class UserCreate(UserBase):

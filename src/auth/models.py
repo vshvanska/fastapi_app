@@ -14,7 +14,7 @@ class User(BaseModel):
     birthdate: Mapped[Optional[date]]
     hashed_password: Mapped[str] = mapped_column(String)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __repr__(self):
         return {self.username}
