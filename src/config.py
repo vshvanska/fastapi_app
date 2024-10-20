@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES = 300
     REFRESH_TOKEN_EXPIRE_DAYS = 1
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
 
     class Config:
         case_sensitive = True

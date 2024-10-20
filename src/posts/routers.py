@@ -90,7 +90,6 @@ async def delete_post(
 ):
     token_data = await authenticator.check_if_authenticated(token=token)
     instance = await repository.get_instance(id=post_id, session=session)
-    instance = await repository.get_instance(id=post_id, session=session)
     if not instance:
         raise HTTPException(status_code=404, detail="Instance not found")
 
