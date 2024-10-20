@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.auth.models import User
 from src.posts.models import Post
@@ -60,3 +61,13 @@ class PostRepository:
 
         await session.delete(post)
         await session.commit()
+
+    async def make_instance_inactive(self, id: int, session: AsyncSession):
+        post = await self.get_instance(id, session)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+
+        post.is_active = False
+        session.add(post)
+        await session.commit()
+        return post

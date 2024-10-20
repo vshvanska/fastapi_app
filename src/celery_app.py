@@ -9,5 +9,10 @@ celery_app = Celery(
 
 
 celery_app.conf.update(
-    result_expires=3600, timezone="UTC", enable_utc=True, imports=["src.comments.tasks"]
+    result_expires=3600,
+    timezone="UTC",
+    enable_utc=True,
+    task_always_eager=True,
+    task_eager_propagates=True,
+    imports=["src.comments.tasks", "src.posts.tasks"],
 )

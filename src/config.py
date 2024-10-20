@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
     CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str
+    AI_API_KEY: str
 
     class Config:
         case_sensitive = True

@@ -2,7 +2,7 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
-from src.comments.tasks import create_reply_comment
+from src.comments.tasks import create_reply_comment, check_comment
 from src.auth.auth import Authenticator
 from src.comments.schemas import CommentBase, Comment, CommentRead, CommentUpdate
 from src.config import settings
@@ -38,6 +38,7 @@ async def create_comment(
     token_data = await authenticator.check_if_authenticated(token=token)
     data["user_id"] = token_data.id
     instance = await repository.create_instance(data=data, session=session)
+    check_comment.delay({"id": instance.id, "content": instance.content})
     if post and post.auto_reply:
         reply_comment = {
             "content": post.reply_text,
@@ -91,6 +92,9 @@ async def update_comment(
 
     updated_instance = await repository.update_instance(
         id=comment_id, data=data, session=session
+    )
+    check_comment.delay(
+        {"id": updated_instance.id, "content": updated_instance.content}
     )
     return updated_instance
 

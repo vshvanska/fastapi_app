@@ -17,17 +17,27 @@ class CommentRepository:
 
     async def update_instance(self, id: int, data: dict, session: AsyncSession):
         data = data.model_dump()
-        post = await self.get_instance(id, session)
-        if not post:
+        comment = await self.get_instance(id, session)
+        if not comment:
             raise HTTPException(status_code=404, detail="Post not found")
 
         for key, value in data.items():
-            setattr(post, key, value)
+            setattr(comment, key, value)
 
-        session.add(post)
+        session.add(comment)
         await session.commit()
 
-        return post
+        return comment
+
+    async def make_instance_inactive(self, id: int, session: AsyncSession):
+        comment = await self.get_instance(id, session)
+        if not comment:
+            raise HTTPException(status_code=404, detail="Post not found")
+
+        comment.is_active = False
+        session.add(comment)
+        await session.commit()
+        return comment
 
     async def get_instance(self, id: int, session: AsyncSession):
         result = await session.scalars(select(self.model).where(self.model.id == id))

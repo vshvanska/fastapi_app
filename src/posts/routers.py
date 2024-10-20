@@ -8,6 +8,7 @@ from src.config import settings
 from src.dependencies import get_authenticator, get_post_repository, get_async_session
 from src.posts.repository import PostRepository
 from src.posts.schemas import Post, PostBase, PostList
+from src.posts.tasks import check_post
 
 post_router = APIRouter(tags=["Posts"], prefix="/posts")
 
@@ -25,6 +26,7 @@ async def create_post(
     data = data.model_dump()
     data["user_id"] = token_data.id
     instance = await repository.create_instance(data=data, session=session)
+    check_post.delay({"id": instance.id, "content": instance.content})
     return instance
 
 
@@ -77,6 +79,7 @@ async def update_post(
     updated_instance = await repository.update_instance(
         id=post_id, data=data, session=session
     )
+    check_post.delay({"id": updated_instance.id, "content": updated_instance.content})
     return updated_instance
 
 

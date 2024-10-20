@@ -1,4 +1,5 @@
 import pytest
+
 from sqlalchemy import insert, select
 from src.auth.hasher import hasher
 from src.auth.models import User
