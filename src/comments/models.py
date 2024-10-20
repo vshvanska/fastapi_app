@@ -1,6 +1,5 @@
 from typing import Optional, List
-
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column
 from src.models import BaseModel
@@ -12,6 +11,7 @@ class Comment(BaseModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(String(150))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
     parent_id: Optional[Mapped[int]] = mapped_column(

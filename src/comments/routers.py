@@ -9,7 +9,8 @@ from src.config import settings
 from src.dependencies import (
     get_authenticator,
     get_comment_repository,
-    get_async_session, get_post_repository,
+    get_async_session,
+    get_post_repository,
 )
 from src.posts.repository import PostRepository
 from src.repositories import AbstractRepository
@@ -38,7 +39,12 @@ async def create_comment(
     data["user_id"] = token_data.id
     instance = await repository.create_instance(data=data, session=session)
     if post and post.auto_reply:
-        reply_comment = {"content": post.reply_text, "post_id": post.id, "user_id": post.user_id, "parent_id": instance.id}
+        reply_comment = {
+            "content": post.reply_text,
+            "post_id": post.id,
+            "user_id": post.user_id,
+            "parent_id": instance.id,
+        }
         create_reply_comment.delay(reply_comment)
     return instance
 
@@ -49,8 +55,8 @@ async def get_comments(
     repository: AbstractRepository = Depends(get_comment_repository),
     session: AsyncSession = Depends(get_async_session),
 ):
-    posts = await repository.get_list(session=session, post_id=post_id)
-    return posts
+    comments = await repository.get_list(session=session, post_id=post_id)
+    return comments
 
 
 @comment_router.get("/my", response_model=List[CommentRead])

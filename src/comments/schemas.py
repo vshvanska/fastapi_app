@@ -24,6 +24,7 @@ class Comment(CommentBase, BaseInstance):
 
 class CommentRead(BaseInstance):
     content: str
+    is_active: bool
     parent_id: Optional[int] = None
     post: PostComment
     user: UserPost

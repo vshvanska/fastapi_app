@@ -13,6 +13,7 @@ class Post(BaseModel):
     content: Mapped[str]
     auto_reply: Mapped[bool] = mapped_column(Boolean, default=False)
     reply_text: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     comments: Mapped[List[Comment]] = relationship(
         Comment, back_populates="post", cascade="all, delete-orphan"
