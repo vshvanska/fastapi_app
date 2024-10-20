@@ -9,8 +9,9 @@ from src.config import settings
 from src.dependencies import (
     get_authenticator,
     get_comment_repository,
-    get_async_session,
+    get_async_session, get_post_repository,
 )
+from src.posts.repository import PostRepository
 from src.repositories import AbstractRepository
 
 comment_router = APIRouter(tags=["Comments"], prefix="/comments")
@@ -22,12 +23,23 @@ async def create_comment(
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
     repository: AbstractRepository = Depends(get_comment_repository),
+    post_repository: PostRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
 ):
-    token_data = await authenticator.check_if_authenticated(token=token)
     data = data.model_dump()
+    post = await post_repository.get_instance(id=data["post_id"], session=session)
+    if not post:
+        raise HTTPException(status_code=404, detail="Invalid data")
+    if data.get("parent_id"):
+        parent = await repository.get_instance(id=data["parent_id"], session=session)
+        if not parent:
+            raise HTTPException(status_code=404, detail="Invalid data")
+    token_data = await authenticator.check_if_authenticated(token=token)
     data["user_id"] = token_data.id
     instance = await repository.create_instance(data=data, session=session)
+    if post and post.auto_reply:
+        reply_comment = {"content": post.reply_text, "post_id": post.id, "user_id": post.user_id, "parent_id": instance.id}
+        repository.create_instance(reply_comment, session=session)
     return instance
 
 
@@ -78,7 +90,7 @@ async def update_comment(
 
 
 @comment_router.delete("/{comment_id}")
-async def delete_post(
+async def delete_comment(
     comment_id: int,
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),

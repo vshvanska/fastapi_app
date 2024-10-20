@@ -6,8 +6,8 @@ from starlette.responses import JSONResponse
 from src.auth.auth import Authenticator
 from src.config import settings
 from src.dependencies import get_authenticator, get_post_repository, get_async_session
+from src.posts.repository import PostRepository
 from src.posts.schemas import Post, PostBase, PostList
-from src.repositories import AbstractRepository
 
 post_router = APIRouter(tags=["Posts"], prefix="/posts")
 
@@ -17,9 +17,10 @@ async def create_post(
     data: PostBase,
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
-    repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
+    repository: PostRepository = Depends(get_post_repository),
 ):
+
     token_data = await authenticator.check_if_authenticated(token=token)
     data = data.model_dump()
     data["user_id"] = token_data.id
@@ -31,11 +32,10 @@ async def create_post(
 async def get_posts(
     username: Optional[str] = None,
     title: Optional[str] = None,
-    authenticator: Authenticator = Depends(get_authenticator),
-    repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
+    repository: PostRepository = Depends(get_post_repository),
 ):
-    posts = await repository.get_list(session=session, username=username, title=title)
+    posts = await repository.get_list(username=username, title=title, session=session)
     return posts
 
 
@@ -43,13 +43,13 @@ async def get_posts(
 async def get_personal_posts(
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
-    repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
+    repository: PostRepository = Depends(get_post_repository),
 ):
 
     token_data = await authenticator.check_if_authenticated(token=token)
     user_id = token_data.id
-    posts = await repository.get_list(session=session, user_id=user_id)
+    posts = await repository.get_list(user_id=user_id, session=session)
     return posts
 
 
@@ -59,8 +59,8 @@ async def update_post(
     data: PostBase,
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
-    repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
+    repository: PostRepository = Depends(get_post_repository),
 ):
     token_data = await authenticator.check_if_authenticated(token=token)
     instance = await repository.get_instance(id=post_id, session=session)
@@ -85,8 +85,8 @@ async def delete_post(
     post_id: int,
     token: Annotated[str, Depends(settings.oauth2_scheme)],
     authenticator: Authenticator = Depends(get_authenticator),
-    repository: AbstractRepository = Depends(get_post_repository),
     session: AsyncSession = Depends(get_async_session),
+    repository: PostRepository = Depends(get_post_repository),
 ):
     token_data = await authenticator.check_if_authenticated(token=token)
     instance = await repository.get_instance(id=post_id, session=session)

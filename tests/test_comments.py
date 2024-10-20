@@ -72,6 +72,46 @@ def test_create_comment_unauthorized(add_post):
     assert response.status_code == 401
 
 
+def test_create_comment_with_post():
+    comment_data = {
+        "content": "My Test Comment",
+    }
+    user_data = {"username": userdata["username"], "password": userdata["password"]}
+    login_response = client.post("/users/token", data=user_data)
+    login_response_data = login_response.json()
+    comment_data["post_id"] = 1008
+
+    response = client.post(
+        "/comments",
+        headers={"Authorization": f"Bearer {login_response_data.get('access')}"},
+        json=comment_data,
+    )
+    assert response.status_code == 404
+
+
+def test_create_comment_with_invalid_parent():
+    comment_data = {
+        "content": "My Test Comment",
+    }
+    user_data = {"username": userdata["username"], "password": userdata["password"]}
+    login_response = client.post("/users/token", data=user_data)
+    login_response_data = login_response.json()
+    post_response = client.get(
+        "/posts/my",
+        headers={"Authorization": f"Bearer {login_response_data.get('access')}"},
+    )
+    post_id = int(post_response.json()[0]["id"])
+    comment_data["post_id"] = post_id
+    comment_data["parent_id"] = 1008
+
+    response = client.post(
+        "/comments",
+        headers={"Authorization": f"Bearer {login_response_data.get('access')}"},
+        json=comment_data,
+    )
+    assert response.status_code == 404
+
+
 def test_get_list_comments_success(add_post):
     post_id = add_post
     comment_data = {"content": "My Test Comment", "post_id": post_id}

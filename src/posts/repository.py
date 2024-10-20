@@ -2,7 +2,6 @@ from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.auth.models import User
 from src.posts.models import Post
@@ -11,38 +10,38 @@ from src.posts.models import Post
 class PostRepository:
     model = Post
 
-    async def create_instance(self, data: dict, session: AsyncSession):
+    async def create_instance(self, data, session):
         new_item = self.model(**data)
         session.add(new_item)
         await session.commit()
         return new_item
 
-    async def update_instance(self, id: int, data: dict, session: AsyncSession):
+    async def update_instance(self, id: int, data: dict, session):
         data = data.model_dump()
-        post = await self.get_instance(id, session)
-        if not post:
+        comment = await self.get_instance(id, session)
+        if not comment:
             raise HTTPException(status_code=404, detail="Post not found")
 
         for key, value in data.items():
-            setattr(post, key, value)
+            setattr(comment, key, value)
 
-        session.add(post)
+        session.add(comment)
         await session.commit()
 
-        return post
+        return comment
 
-    async def get_instance(self, id: int, session: AsyncSession):
+    async def get_instance(self, id: int, session):
         result = await session.scalars(select(self.model).where(self.model.id == id))
         return result.one_or_none()
 
     async def get_list(
         self,
-        session: AsyncSession,
+        session,
         user_id: Optional[int] = None,
         username: Optional[str] = None,
         title: Optional[str] = None,
     ):
-        result = select(self.model).options(selectinload(Post.user))
+        result = select(self.model).options(selectinload(self.model.user))
         if user_id:
             result = result.where(self.model.user_id == user_id)
         if username:
@@ -54,7 +53,7 @@ class PostRepository:
         result = await session.scalars(result)
         return result.all()
 
-    async def delete_instance(self, id: int, session: AsyncSession):
+    async def delete_instance(self, id: int, session):
         post = await self.get_instance(id, session)
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")

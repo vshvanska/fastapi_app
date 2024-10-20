@@ -17,6 +17,9 @@ SessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
+async def get_async_session():
+    async with SessionLocal() as session:
+        yield session
 
 Base = declarative_base()
 metadata = MetaData()
