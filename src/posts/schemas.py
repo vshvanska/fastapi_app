@@ -18,6 +18,7 @@ class Post(PostBase, BaseInstance):
 
 class PostList(PostBase, BaseInstance):
     id: int
+    is_active: bool
     user: UserPost
 
     model_config = ConfigDict(from_attributes=True)

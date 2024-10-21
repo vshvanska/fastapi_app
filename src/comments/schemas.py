@@ -12,6 +12,8 @@ class CommentBase(BaseModel):
     post_id: int
     parent_id: Optional[int] = None
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CommentUpdate(BaseModel):
     content: str

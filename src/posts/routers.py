@@ -2,7 +2,6 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
-
 from src.auth.auth import Authenticator
 from src.config import settings
 from src.dependencies import get_authenticator, get_post_repository, get_async_session
