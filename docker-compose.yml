@@ -1,0 +1,55 @@
+version: '3'
+
+networks:
+  db-data-net:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:13.3-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    env_file:
+      - ./.env
+    volumes:
+      - db-data:/var/lib/postgresql
+    networks:
+      - db-data-net
+    ports:
+      - "5433:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "alembic upgrade head && uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - db-data-net
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    expose:
+      - 6379
+
+
+  celery:
+    build:
+      context: .
+    container_name: celery
+    command: sh -c "celery -A src.celery_app.celery_app worker --loglevel=info"
+    depends_on:
+      - redis
+      - postgres
+    restart: on-failure
+
+
+volumes:
+  db-data:
