@@ -4,9 +4,10 @@ from sqlalchemy import select, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from src.comments.models import Comment
+from src.repositories import DBRepository
 
 
-class CommentRepository:
+class CommentRepository(DBRepository):
     model = Comment
 
     async def create_instance(self, data: dict, session: AsyncSession):
@@ -14,20 +15,6 @@ class CommentRepository:
         session.add(new_item)
         await session.commit()
         return new_item
-
-    async def update_instance(self, id: int, data: dict, session: AsyncSession):
-        data = data.model_dump()
-        comment = await self.get_instance(id, session)
-        if not comment:
-            raise HTTPException(status_code=404, detail="Post not found")
-
-        for key, value in data.items():
-            setattr(comment, key, value)
-
-        session.add(comment)
-        await session.commit()
-
-        return comment
 
     async def make_instance_inactive(self, id: int, session: AsyncSession):
         comment = await self.get_instance(id, session)
@@ -38,10 +25,6 @@ class CommentRepository:
         session.add(comment)
         await session.commit()
         return comment
-
-    async def get_instance(self, id: int, session: AsyncSession):
-        result = await session.scalars(select(self.model).where(self.model.id == id))
-        return result.one_or_none()
 
     async def get_list(
         self, session: AsyncSession, post_id: int = None, user_id: int = None
@@ -59,14 +42,6 @@ class CommentRepository:
         result = await session.scalars(result)
 
         return result.all()
-
-    async def delete_instance(self, id: int, session: AsyncSession):
-        comment = await self.get_instance(id, session)
-        if not comment:
-            raise HTTPException(status_code=404, detail="Comment not found")
-
-        await session.delete(comment)
-        await session.commit()
 
     async def get_analytics(
         self, session: AsyncSession, date_from: date = None, date_to: date = None

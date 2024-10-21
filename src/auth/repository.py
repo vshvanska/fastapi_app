@@ -2,22 +2,17 @@ from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.auth.hasher import hasher
 from src.auth.models import User
-from src.repositories import AbstractRepository
+from src.repositories import DBRepository
 
 
-class UserRepository(AbstractRepository):
+class UserRepository(DBRepository):
     model = User
 
     async def get_list(self, session, *args, **kwargs):
         result = await session.scalars(select(self.model))
         return result.all()
-
-    async def get_instance(self, id, session):
-        result = await session.scalars(select(self.model).where(self.model.id == id))
-        return result.one_or_none()
 
     async def create_instance(self, data, session: AsyncSession):
         data = await self.process_data(data)
@@ -31,18 +26,6 @@ class UserRepository(AbstractRepository):
             content={"message": "User created successfully", "user_id": new_item.id},
             status_code=201,
         )
-
-    async def update_instance(self, id: int, data: dict, session: AsyncSession):
-        data = data.model_dump()
-        user = await self.get_instance(id, session)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        for key, value in data.items():
-            setattr(user, key, value)
-        await session.commit()
-
-        return user
 
     async def check_if_user_exists(self, data, session):
         instance = await self.get_by_email(data["email"], session)

@@ -18,10 +18,5 @@ SessionLocal = sessionmaker(
 )
 
 
-async def get_async_session():
-    async with SessionLocal() as session:
-        yield session
-
-
 Base = declarative_base()
 metadata = MetaData()

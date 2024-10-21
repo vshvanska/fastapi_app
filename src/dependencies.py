@@ -1,5 +1,5 @@
 from src.auth.auth import Authenticator
-from src.auth.repositories import UserRepository
+from src.auth.repository import UserRepository
 from src.comments.repository import CommentRepository
 from src.database import SessionLocal
 from src.posts.repository import PostRepository
