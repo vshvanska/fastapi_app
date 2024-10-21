@@ -22,6 +22,7 @@ class CommentUpdate(BaseModel):
 class Comment(CommentBase, BaseInstance):
     id: int
     user_id: int
+    is_active: bool
 
 
 class CommentRead(BaseInstance):

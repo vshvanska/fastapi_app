@@ -14,6 +14,11 @@ This is a simple API for managing posts and comments with AI moderation and auto
 
 
 ### System Requirements
+I made some changes after recording this video - updated pydentic model for comment list to see if it is active
+
+And moderation feature will not work for you without genai api token. I believe you know, but should have said
+
+Loom link: [Loom](https://www.loom.com/share/2f3dfddd2420438ea3dc6dd4e76c61d7?sid=1a336d28-ac49-4778-a531-e715ab18e3f0)
 
 Before running the Library Service Project, ensure that your system meets the following requirements:
 
